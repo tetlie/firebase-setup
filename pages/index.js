@@ -1,65 +1,45 @@
-import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+import firebaseInstance from '../config/firebase'
 
-export default function Home() {
+export default function Home({ artist, error }) {
+  if (error !== undefined) {
+    return (
+      <p>En feil har oppstått: {error}</p>
+    )
+  }
   return (
-    <div className={styles.container}>
-      <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
-    </div>
+    <>
+    <pre>
+      <code>{JSON.stringify(artist, null, 2)}</code>
+    </pre>
+    </>
   )
+
 }
+
+// async - skal være ferdig før komponenten rendres
+// alt som må være klart fra serveren
+// skal etter hvert inn som miljøvariabler
+Home.getInitialProps = async () => {
+  
+  try { // gjør en spørring mot databasen
+
+    const collection = await firebaseInstance.firestore().collection('artists'); // sett opp en samling dokumenter
+    const document  = await collection.doc('p3VE4yA55pO2VBeM3FxQ').get(); //.get = selve dokumentet slik det ser ut nå
+    if (document.exists !== true) { // dersom det ikke finnes, kast en feil
+      throw new Error('Dokumentet finnes ikke')
+    };
+
+    const artist = { // dersom det finnes
+      id: document.id,
+      ...document.data() // .data() returnere alle datatene som ligger i dokumentet på dette tidspunktet
+    };
+
+    return { artist };
+
+  } catch (error) {
+    return { // dersom det oppstår en feil, lagre dette i en feilmelding som kan brukes i komponenten
+      error: error.message
+    };
+  }
+
+};
