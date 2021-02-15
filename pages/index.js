@@ -1,6 +1,6 @@
 import firebaseInstance from '../config/firebase'
 
-export default function Home({ artist, error }) {
+export default function Home({ album, error }) {
   if (error !== undefined) {
     return (
       <p>En feil har oppstått: {error}</p>
@@ -9,7 +9,7 @@ export default function Home({ artist, error }) {
   return (
     <>
     <pre>
-      <code>{JSON.stringify(artist, null, 2)}</code>
+      <code>{JSON.stringify(album, null, 2)}</code>
     </pre>
     </>
   )
@@ -23,18 +23,18 @@ Home.getInitialProps = async () => {
   
   try { // gjør en spørring mot databasen
 
-    const collection = await firebaseInstance.firestore().collection('artists'); // sett opp en samling dokumenter
-    const document  = await collection.doc('p3VE4yA55pO2VBeM3FxQ').get(); //.get = selve dokumentet slik det ser ut nå
+    const collection = await firebaseInstance.firestore().collection('albums'); // sett opp en samling dokumenter
+    const document  = await collection.doc('rss5409THfGwtqr2YQbX').get(); //.get = selve dokumentet slik det ser ut nå
     if (document.exists !== true) { // dersom det ikke finnes, kast en feil
       throw new Error('Dokumentet finnes ikke')
     };
 
-    const artist = { // dersom det finnes
+    const album = { // dersom det finnes
       id: document.id,
       ...document.data() // .data() returnere alle datatene som ligger i dokumentet på dette tidspunktet
     };
 
-    return { artist };
+    return { album };
 
   } catch (error) {
     return { // dersom det oppstår en feil, lagre dette i en feilmelding som kan brukes i komponenten
